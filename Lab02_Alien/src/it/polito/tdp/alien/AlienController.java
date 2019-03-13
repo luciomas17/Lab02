@@ -72,7 +72,7 @@ public class AlienController {
         		if(translation == null) {
         			txtResult.appendText("Errore: parola " + input[0] + " non trovata.\n");
         		} else {
-        			txtResult.appendText("La traduzione della parola " + input[0] + " è: " + translation + ".\n");
+        			txtResult.appendText("Le possibili traduzioni della parola " + input[0] + " sono: " + translation + ".\n");
         		}
         	}
     	}
