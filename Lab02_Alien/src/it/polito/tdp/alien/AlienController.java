@@ -7,6 +7,8 @@ package it.polito.tdp.alien;
 
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import javafx.event.ActionEvent;
@@ -46,34 +48,86 @@ public class AlienController {
     @FXML
     void doTranslate(ActionEvent event) {
     	String[] input = this.txtWord.getText().trim().split(" ");
-    	boolean syntaxErrors = false; 
+    	
+    	boolean syntaxErrors = false;
     	
     	for(int i=0; i<input.length; i++) {
-    		if(input[i].matches("[a-zA-Z]*")) {
-    			input[i] = input[i].toLowerCase();
+    		if(i == 0) {
+    			if(input[i].matches("[a-zA-Z?]*")) {
+            		input[i] = input[i].toLowerCase();
+            	} else {
+        			txtResult.appendText("Errore: la parola aliena deve contenere solo caratteri alfabetici e al massimo un '?'.\n");
+        			syntaxErrors = true;
+        		}
     		} else {
-    			txtResult.appendText("Errore: inserisci caratteri alfabetici.\n");
-    			syntaxErrors = true;
+    			if(input[i].matches("[a-zA-Z]*")) {
+            		input[i] = input[i].toLowerCase();
+            	} else {
+        			txtResult.appendText("Errore: la traduzione deve contenere solo caratteri alfabetici.\n");
+        			syntaxErrors = true;
+        		}
+    		}
+    		
+    	}
+    	
+    	int countWildcards = 0;
+    	
+		for(int i=0; i<input[0].length(); i++) {
+    		if(input[0].charAt(i) == '?') {
+    			countWildcards++;
     		}
     	}
     	
     	if(syntaxErrors == false) {
     		if(input.length < 1 || input.length > 2) {
-        		txtResult.appendText("Errore: formato di inserimento testo non corretto.\n");
+        		txtResult.appendText("Errore: formato di inserimento non corretto.\n");
         	}
         	
         	if(input.length == 2) {
-        		model.addWord(input[0], input[1]);
-        		txtResult.appendText("Aggiunta traduzione per la parola " + input[0] + ".\n");
+        		if(countWildcards == 0) {
+        			model.addWord(input[0], input[1]);
+            		txtResult.appendText("Aggiunta traduzione per la parola " + input[0] + ".\n");
+        		}
+        		
+        		if(countWildcards == 1) {
+        			txtResult.appendText("Errore: il carattere '?' può essere inserito solo in caso di ricerca.\n");
+        		}
         	}
         	
         	if(input.length == 1) {
-        		String translation = model.translateWord(input[0]);
-        		if(translation == null) {
-        			txtResult.appendText("Errore: parola " + input[0] + " non trovata.\n");
-        		} else {
-        			txtResult.appendText("Le possibili traduzioni della parola " + input[0] + " sono: " + translation + ".\n");
-        		}
+            	if(countWildcards == 0) {
+            		String translation = model.translateWord(input[0]);
+            		if(translation == null) {
+            			txtResult.appendText("Errore: parola " + input[0] + " non trovata.\n");
+            		} else {
+            			txtResult.appendText("Le possibili traduzioni della parola " + input[0] + " sono: " + translation + ".\n");
+            		}
+            	}
+            	
+            	if(countWildcards == 1) {
+            		List<String> wordsFound = new ArrayList<String>();
+            		char c = 'a';
+            		
+            		while(c <= 'z') {
+            			String tentativo = input[0].replace('?', c);
+            			String translation = model.translateWord(tentativo);
+                		if(translation != null) 
+                			wordsFound.add(tentativo);
+                		c++;
+            		}
+            		
+            		txtResult.appendText(wordsFound.size() + " parola/e trovate");
+            		if(wordsFound.size() == 0)
+            			txtResult.appendText(".\n");
+            		else {
+            			txtResult.appendText(":\n");
+            			
+            			for(int i=0; i<wordsFound.size(); i++) {
+                			String translation = model.translateWord(wordsFound.get(i));
+                			txtResult.appendText("Le possibili traduzioni della parola " + wordsFound.get(i) + " sono: " + translation + ".\n");
+                		}
+            		}
+            	}
         	}
     	}
     	
