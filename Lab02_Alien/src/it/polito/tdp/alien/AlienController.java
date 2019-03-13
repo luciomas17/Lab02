@@ -17,6 +17,8 @@ import javafx.scene.control.TextField;
 
 public class AlienController {
 	
+	private AlienDictionary model;
+	
     @FXML
     private ResourceBundle resources;
     @FXML
@@ -43,13 +45,49 @@ public class AlienController {
     
     @FXML
     void doTranslate(ActionEvent event) {
-    	    	
+    	String[] input = this.txtWord.getText().trim().split(" ");
+    	boolean syntaxErrors = false; 
+    	
+    	for(int i=0; i<input.length; i++) {
+    		if(input[i].matches("[a-zA-Z]*")) {
+    			input[i] = input[i].toLowerCase();
+    		} else {
+    			txtResult.appendText("Errore: inserisci caratteri alfabetici.\n");
+    			syntaxErrors = true;
+    		}
+    	}
+    	
+    	if(syntaxErrors == false) {
+    		if(input.length < 1 || input.length > 2) {
+        		txtResult.appendText("Errore: formato di inserimento testo non corretto.\n");
+        	}
+        	
+        	if(input.length == 2) {
+        		model.addWord(input[0], input[1]);
+        		txtResult.appendText("Aggiunta traduzione per la parola " + input[0] + ".\n");
+        	}
+        	
+        	if(input.length == 1) {
+        		String translation = model.translateWord(input[0]);
+        		if(translation == null) {
+        			txtResult.appendText("Errore: parola " + input[0] + " non trovata.\n");
+        		} else {
+        			txtResult.appendText("La traduzione della parola " + input[0] + " è: " + translation + ".\n");
+        		}
+        	}
+    	}
+    	
+    	txtWord.clear();
     }
     
     
     @FXML
     void doReset(ActionEvent event) {
-
+    	txtWord.clear();
+    	txtResult.clear();
     }
     
+    public void setModel(AlienDictionary model) {
+    	this.model = model;
+    }
 }
